@@ -1,0 +1,16 @@
+{
+  "name": "@cheemcheem/adventofcode-type-config",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    "default": "./node.json"
+  },
+  "files": [
+    "node.json"
+  ],
+  "peerDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "author": "Kathan Cheema",
+  "license": "GPL-3.0-only"
+}

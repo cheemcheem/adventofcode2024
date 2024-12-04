@@ -1,0 +1,18 @@
+{
+  "name": "@cheemcheem/adventofcode-challenge",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "devDependencies": {
+    "@types/yargs": "^17.0.33",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.2",
+    "yargs": "^17.7.2",
+    "@cheemcheem/adventofcode-type-config": "workspace:*"
+  },
+  "dependencies": {
+    "@cheemcheem/adventofcode-common": "workspace:*"
+  },
+  "author": "Kathan Cheema",
+  "license": "GPL-3.0-only"
+}
