@@ -1,7 +1,4 @@
 {
     "extends": "@cheemcheem/adventofcode-type-config",
-    "include": ["src/**/*"],
-    "compilerOptions": {
-        "outDir": "lib"
-    }
+    "include": ["src/**/*"]
 }

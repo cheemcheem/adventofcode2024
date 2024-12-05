@@ -8,6 +8,7 @@
   "packageManager": "pnpm@9.14.4",
   "scripts": {
     "commit": "pnpm --filter @cheemcheem/adventofcode-commit-helper start",
+    "typecheck": "pnpm --filter=!@cheemcheem/adventofcode-type-config[origin/main] exec tsc --noEmit",
     "lint": "eslint --fix .",
     "prepare": "husky",
     "start": "pnpm --filter @cheemcheem/adventofcode-challenge-runner start"
