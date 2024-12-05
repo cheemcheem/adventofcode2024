@@ -8,12 +8,13 @@
   "packageManager": "pnpm@9.14.4",
   "scripts": {
     "commit": "pnpm --filter @cheemcheem/adventofcode-commit-helper start",
-    "lint": "lint-staged",
+    "lint": "eslint --fix .",
     "prepare": "husky",
     "start": "pnpm --filter @cheemcheem/adventofcode-challenge-runner start"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
+    "@stylistic/eslint-plugin": "^2.11.0",
     "@types/node": "^22.10.1",
     "eslint": "^9.16.0",
     "globals": "^15.13.0",

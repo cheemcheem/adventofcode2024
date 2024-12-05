@@ -9,7 +9,7 @@ const isValidUpdate = (update: number[], rules: number[][]) => {
     }
   }
   return true;
-}
+};
 
 const correctOrdering = (update: number[], rules: number[][]) => {
   // could be made more performant
@@ -23,14 +23,14 @@ const correctOrdering = (update: number[], rules: number[][]) => {
     if (firstIndex >= 0 && secondIndex >= 0 && firstIndex > secondIndex) {
       const duplicate = [...update];
       return correctOrdering([
-        ...duplicate.slice(0, secondIndex), 
+        ...duplicate.slice(0, secondIndex),
         ...duplicate.splice(firstIndex, 1),
-        ...duplicate.slice(secondIndex, duplicate.length), 
-      ], rules)
+        ...duplicate.slice(secondIndex, duplicate.length),
+      ], rules);
     }
   }
   return update;
-}
+};
 
 const day: Day = {
   part1: async (dayNumber, example) => {
@@ -40,7 +40,7 @@ const day: Day = {
     const updates = updateStrings.split('\n').map(update => update.split(',').map(Number));
 
     const validUpdates = updates.filter(update => isValidUpdate(update, rules));
-    
+
     return validUpdates.reduce((prev, curr) => {
       return prev + curr[Math.floor(curr.length / 2)];
     }, 0);
@@ -52,7 +52,7 @@ const day: Day = {
     const updates = updateStrings.split('\n').map(update => update.split(',').map(Number));
 
     const invalidUpdates = updates.filter(update => !isValidUpdate(update, rules));
-    const correctedUpdates = invalidUpdates.map((update) => correctOrdering(update, rules));
+    const correctedUpdates = invalidUpdates.map(update => correctOrdering(update, rules));
 
     return correctedUpdates.reduce((prev, curr) => {
       return prev + curr[Math.floor(curr.length / 2)];

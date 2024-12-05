@@ -15,11 +15,11 @@ const day: Day = {
     const input = await getInput(dayNumber, example);
     const conditionals = input.matchAll(/do(n't)?\(\)/g).toArray().reverse();
     const instructions = input.matchAll(/mul\(\d\d?\d?,\d\d?\d?\)/g).toArray();
-   
-    const result = instructions.reduce((prev, {"0": curr, index}) => {
-      const [mostRecentConditional] = conditionals.find(({index: conditionalIndex}) => {
+
+    const result = instructions.reduce((prev, { '0': curr, index }) => {
+      const [mostRecentConditional] = conditionals.find(({ index: conditionalIndex }) => {
         return conditionalIndex < index;
-      }) ?? []
+      }) ?? [];
 
       if (mostRecentConditional === "don't()") {
         return prev;
@@ -29,7 +29,7 @@ const day: Day = {
       const [a, b] = commmaSeparated.split(',').map(Number);
       return prev + (a * b);
     }, 0);
-    
+
     return result;
   },
 };
