@@ -21,9 +21,11 @@ const findGuard = (grid: Readonly<GridValue[][]>) => {
   return { status: 'finished' } as const;
 };
 
+const copyGrid = (grid: Readonly<GridValue[][]>) => [...grid].map(gridRow => [...gridRow]);
+
 const traverse = (grid: Readonly<GridValue[][]>) => {
   const { rowIndex, columnIndex, status, direction } = findGuard(grid);
-  const newGrid = [...grid].map(gridRow => [...gridRow]);
+  const newGrid = copyGrid(grid);
 
   if (status === 'finished') {
     return {
@@ -106,6 +108,39 @@ const logGrid = (grid: Readonly<GridValue[][]>) => {
   process.stdout.write('\n');
 };
 
+type Position = { rowIndex: number; columnIndex: number; direction: Direction };
+const positionEquals = (p1: Position, p2: Position) => p1.rowIndex === p2.rowIndex && p1.columnIndex === p2.columnIndex && p1.direction === p2.direction;
+
+const gridContainsLoop = (grid: Readonly<GridValue[][]>) => {
+  let lastGrid = traverse(grid);
+  const positions: Position[] = [];
+  const lastGuard = findGuard(lastGrid.grid);
+  while (lastGrid.status === 'traversable') {
+    const guard = findGuard(lastGrid.grid);
+
+    if (guard.status === 'finished') {
+      break;
+    }
+
+    if (positions.find(position => positionEquals(position, guard))) {
+      return true;
+    }
+
+    positions.push(guard);
+
+    lastGrid = traverse(lastGrid.grid);
+  };
+  return false;
+};
+
+// WIP on more efficient method with less finding the guard and no going over the same position
+// const traverseForLoops = (grid: Readonly<GridValue[][]>, positions: Position[], guard: Position, loopCount = 0) => {
+//   if (positionEquals(guard, positions[0])) {
+//     if (gridContainsLoop(grid))
+//   }
+//   // else traverseForLoops(traverse(grid))
+// }
+
 const day: Day = {
   part1: async (dayNumber, example) => {
     const grid = (await getInputSplitByLine(dayNumber, example)).map(row => row.split('') as GridValue[]);
@@ -119,24 +154,30 @@ const day: Day = {
     return countTraversed(lastGrid.grid);
   },
   part2: async (dayNumber, example) => {
-    const grid = (await getInputSplitByLine(dayNumber, example)).map(row => row.split('') as GridValue[]);
+    const grid: Readonly<GridValue[][]> = (await getInputSplitByLine(dayNumber, example)).map(row => row.split('') as GridValue[]);
 
     // Get list of positions and directions that the guard takes
     let lastGrid = traverse(grid);
-    const positions: { rowIndex: number; columnIndex: number; direction: Direction }[] = [];
+    const positions: Position[] = [];
     while (lastGrid.status === 'traversable') {
       const guard = findGuard(lastGrid.grid);
-      if (guard.status === 'traversable') {
+      if (guard.status === 'traversable' && !positions.find(position => positionEquals(position, { ...guard, direction: position.direction }))) {
         positions.push(guard);
       }
 
       lastGrid = traverse(lastGrid.grid);
     };
-    console.log(positions);
 
     // Determine if any point on the positions path can be blocked to create a loop
+    const loopingPositions = positions.filter(({ rowIndex, columnIndex }, index, array) => {
+      const gridCopy = copyGrid(grid);
+      gridCopy[rowIndex][columnIndex] = '#';
+      const containsLoop = gridContainsLoop(gridCopy);
+      console.log(`loopingPositions(total: ${array.length})`, index, containsLoop);
+      return containsLoop;
+    });
 
-    return 0;
+    return loopingPositions.length;
   },
 };
 
