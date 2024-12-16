@@ -1,4 +1,4 @@
 {
     "extends": "@cheemcheem/adventofcode-type-config",
-    "include": ["./**/*"]
+    "include": ["./**/*", "../packages/common/src/grid.ts"]
 }
