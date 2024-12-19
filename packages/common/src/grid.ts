@@ -1,54 +1,97 @@
 export type Grid<T> = T[][];
 export type Position = { rowIndex: number; colIndex: number };
+export type GridVector<Limit = number> = { rowIncrement: Limit; colIncrement: Limit };
+
+/* --------- POSITIONS --------- */
+
+export const positionEquals = (p1: Position, p2: Position) => p1.rowIndex === p2.rowIndex && p1.colIndex === p2.colIndex;
+
+export const isPositionUnique = (position: Position, index: number, positions: Position[]) => {
+  return !positions.some((searchPosition, searchIndex) => {
+    return searchIndex > index && positionEquals(position, searchPosition);
+  });
+};
+
+export const matchesPosition = (position: Position) => (searchPosition: Position) => positionEquals(position, searchPosition);
+
+export const isWithinGridBounds = <T>(grid: Readonly<Grid<T>>, { rowIndex, colIndex }: Position) => {
+  return rowIndex >= 0 && rowIndex < grid.length && colIndex >= 0 && colIndex < grid[0].length;
+};
+
+export const isOnGridBounds = <T>(grid: Readonly<Grid<T>>, { rowIndex, colIndex }: Position) => {
+  return rowIndex === 0 || rowIndex === grid.length - 1 || colIndex === 0 || colIndex === grid[0].length - 1;
+};
+
+export const countEdgesTouching = <T>(grid: Readonly<Grid<T>>, { rowIndex, colIndex }: Position) => {
+  const isOnTopOrBottom = (rowIndex === 0 || rowIndex === grid.length - 1);
+  const isOnLeftOrRight = (colIndex === 0 || colIndex === grid[0].length - 1);
+
+  return (isOnTopOrBottom && isOnLeftOrRight)
+    ? 2
+    : (isOnTopOrBottom || isOnLeftOrRight)
+        ? 1
+        : 0;
+};
+
+/* ---------- VECTORS ---------- */
+
+export const UNIT_VECTORS = ([[0, -1], [0, 1], [1, 0], [-1, 0]] as const).map(([rowIncrement, colIncrement]) => ({ rowIncrement, colIncrement }) satisfies GridVector);
+
+export type UnitVector = typeof UNIT_VECTORS[number];
+
+export const UNIT_VECTORS_DIAGONAL = ([[-1, -1], [1, 1], [1, -1], [-1, 1]] as const).map(([rowIncrement, colIncrement]) => ({ rowIncrement, colIncrement }) satisfies GridVector);
+
+export const vectorEquals = (v1: GridVector, v2: GridVector) => v1.rowIncrement === v2.rowIncrement && v1.colIncrement === v2.colIncrement;
+
+export const addPositionToVector = (position: Position, vector: GridVector) => {
+  return { rowIndex: position.rowIndex + vector.rowIncrement, colIndex: position.colIndex + vector.colIncrement } satisfies Position;
+};
+
+export const calculateVector = (position1: Position, position2: Position) => {
+  return ({ rowIncrement: position1.rowIndex - position2.rowIndex, colIncrement: position1.colIndex - position2.colIndex }) satisfies GridVector;
+};
+
+export const multiplyVector = (vector: GridVector, multiple: number) => {
+  return { rowIncrement: vector.rowIncrement * multiple, colIncrement: vector.colIncrement * multiple } satisfies GridVector;
+};
+
+export const vectorToDisplacement = (vector: GridVector) => {
+  // Convert to positive
+  return multiplyVector(vector, vector.rowIncrement < 0 || vector.colIncrement < 0 ? -1 : 1);
+};
+
+export const rotateUnitVector = (vector: UnitVector): UnitVector => {
+  switch (vector.colIncrement) {
+    case 0: return vector.rowIncrement === 1 ? { rowIncrement: 0, colIncrement: 1 } : { rowIncrement: 0, colIncrement: -1 };
+    case 1: return { rowIncrement: -1, colIncrement: 0 };
+    case -1: return { rowIncrement: 1, colIncrement: 0 };
+  }
+};
+
+/* ----------- GRIDS ----------- */
 
 export const getValue = <T>(grid: Readonly<Grid<T>>, position: Position) => {
   return grid[position.rowIndex][position.colIndex];
 };
 
-export const positionEquals = (p1: Position, p2: Position) => p1.rowIndex === p2.rowIndex && p1.colIndex === p2.colIndex;
-
-export const uniquePositions = (positions: Position[]) => {
-  return positions.filter((position, index) => !positions.find((searchPosition, searchIndex) => {
-    return searchIndex > index && positionEquals(position, searchPosition);
-  }));
-};
-
-const isValidRowIndex = <T>(rowIndex: number, grid: Readonly<Grid<T>>) => {
-  return rowIndex >= 0 && rowIndex < grid.length;
-};
-
-const isValidColIndex = <T>(colIndex: number, grid: Readonly<Grid<T>>) => {
-  return colIndex >= 0 && colIndex < grid[0].length;
-};
-
-export const isWithinGridBounds = <T>(grid: Readonly<Grid<T>>, { rowIndex, colIndex }: Position) => {
-  return isValidRowIndex(rowIndex, grid) && isValidColIndex(colIndex, grid);
+type FindNearbyMatchParams<T> = {
+  searchItems?: Readonly<T[]>;
+  grid: Readonly<Grid<T>>;
+} & Position & GridVector<-1 | 0 | 1>;
+const findNearbyMatch = <T>({ colIncrement, colIndex, rowIncrement, rowIndex, searchItems, grid }: FindNearbyMatchParams<T>) => {
+  const newPosition = addPositionToVector({ rowIndex, colIndex }, { rowIncrement, colIncrement });
+  if (isWithinGridBounds(grid, newPosition) && (!searchItems || searchItems.includes(getValue(grid, newPosition)))) {
+    return newPosition;
+  }
+  return undefined;
 };
 
 type SearchNearbyParams<T> = {
   grid: Readonly<Grid<T>>;
   diagonal?: boolean;
   position: Position;
-  searchItems: Readonly<T[]>;
+  searchItems?: Readonly<T[]>;
 };
-
-type ValueAtParams<T> = {
-  colIncrement: -1 | 0 | 1;
-  rowIncrement: -1 | 0 | 1;
-  rowIndex: number;
-  colIndex: number;
-  searchItems: Readonly<T[]>;
-  grid: Readonly<Grid<T>>;
-};
-
-const findNearbyMatch = <T>({ colIncrement, colIndex, rowIncrement, rowIndex, searchItems, grid }: ValueAtParams<T>) => {
-  const newPosition = { rowIndex: rowIndex + rowIncrement, colIndex: colIndex + colIncrement };
-  if (isWithinGridBounds(grid, newPosition) && searchItems.includes(getValue(grid, newPosition))) {
-    return newPosition;
-  }
-  return undefined;
-};
-
 export const searchNearby = <T>({ grid, diagonal, position: { rowIndex, colIndex }, searchItems }: SearchNearbyParams<T>) => {
   const positions: (Position | undefined)[] = [];
 

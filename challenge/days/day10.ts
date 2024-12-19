@@ -1,4 +1,4 @@
-import { ALL_DIGITS, Day, getInputSplitByLine, getValue, Grid, inputAsGrid, Position, searchGrid, searchNearby, sumArray, uniquePositions } from '@cheemcheem/adventofcode-common';
+import { ALL_DIGITS, Day, getInputSplitByLine, getValue, Grid, inputAsGrid, isPositionUnique, Position, searchGrid, searchNearby, sumArray } from '@cheemcheem/adventofcode-common';
 
 const ALLOWED_INPUTS = ['.', ...ALL_DIGITS] as const;
 type GridValue = typeof ALLOWED_INPUTS[number];
@@ -28,7 +28,7 @@ const day: Day = {
     const grid = inputAsGrid(await getInputSplitByLine(dayNumber, example), ALLOWED_INPUTS);
     const trailheads = searchGrid(grid, '0');
     // console.log(trailheads);
-    return sumArray(trailheads.flatMap(position => uniquePositions(navigateTrail(grid, position)).length));
+    return sumArray(trailheads.flatMap(position => navigateTrail(grid, position).filter(isPositionUnique).length));
   },
   part2: async (dayNumber, example) => {
     const grid = inputAsGrid(await getInputSplitByLine(dayNumber, example), ALLOWED_INPUTS);
