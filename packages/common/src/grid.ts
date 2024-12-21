@@ -18,6 +18,9 @@ export const isWithinGridBounds = <T>(grid: Readonly<Grid<T>>, { rowIndex, colIn
   return rowIndex >= 0 && rowIndex < grid.length && colIndex >= 0 && colIndex < grid[0].length;
 };
 
+export const getGridBounds = <T>(grid: Readonly<Grid<T>>): Position => {
+  return { rowIndex: grid.length - 1, colIndex: grid[0].length - 1 };
+};
 export const isOnGridBounds = <T>(grid: Readonly<Grid<T>>, { rowIndex, colIndex }: Position) => {
   return rowIndex === 0 || rowIndex === grid.length - 1 || colIndex === 0 || colIndex === grid[0].length - 1;
 };
@@ -116,8 +119,12 @@ export const searchNearby = <T>({ grid, diagonal, position: { rowIndex, colIndex
   return positions.filter(position => position !== undefined);
 };
 
-export const logGrid = <T>(grid: Readonly<Grid<T>>) => {
-  grid.map(row => row.join('')).forEach(row => process.stdout.write(row + '\n'));
+export const logGrid = <T>(grid: Readonly<Grid<T>>, reverse = false) => {
+  (reverse ? grid.toReversed() : grid)
+    .map(row => (reverse ? row.toReversed() : row)
+      .map(row => String(row ?? '').padStart(2))
+      .join(' '))
+    .forEach(row => process.stdout.write(row + '\n'));
   process.stdout.write('\n');
 };
 
@@ -139,6 +146,8 @@ export const searchGrid = <T>(grid: Readonly<Grid<T>>, ...searchItems: Readonly<
   return positions;
 };
 
+export const MIN_POSITION = { rowIndex: 0, colIndex: 0 } as const satisfies Position;
+
 export const ALL_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
 
 export const inputAsGrid = <T = string>(input: string[], allowedValues?: Readonly<T[]>): Grid<T> => {
@@ -149,4 +158,8 @@ export const inputAsGrid = <T = string>(input: string[], allowedValues?: Readonl
   }
 
   return mapped as Grid<T>;
+};
+
+export const createGrid = <T>(rowCount: number, initialValue: T, colCount = rowCount) => {
+  return Array.from({ length: rowCount }).map(() => Array.from({ length: colCount }).map(() => initialValue));
 };
